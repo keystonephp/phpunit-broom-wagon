@@ -7,7 +7,7 @@ use PHPUnit_Framework_Test;
 use PHPUnit_Framework_TestCase;
 use PHPUnit_Framework_TestSuite;
 
-class BroomWagonListener extends PHPUnit_Framework_BaseTestListener
+class TestListener extends PHPUnit_Framework_BaseTestListener
 {
     /**
      * @var int
