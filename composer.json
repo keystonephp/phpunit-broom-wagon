@@ -1,6 +1,7 @@
 {
     "name": "keystone/phpunit-broom-wagon",
     "description": "Find slow tests within your PHPUnit test suite.",
+    "keywords": ["phpunit", "slow", "profile"],
     "type": "library",
     "license": "MIT",
     "require": {
