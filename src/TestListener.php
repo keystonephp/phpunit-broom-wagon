@@ -50,7 +50,7 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
 
         $timeMilliseconds = (int) round($timeSeconds * 1000);
         if ($timeMilliseconds >= $this->getSlowThreshold($test)) {
-            $this->slowTests[$test->toString()] = $timeMilliseconds;
+            $this->slowTests[$this->makeLabel($test)] = $timeMilliseconds;
         }
     }
 
@@ -99,6 +99,11 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
         if ($hiddenCount > 0) {
             printf("\nThere are %d more tests slower than the threshold.", $hiddenCount);
         }
+    }
+
+    private function makeLabel(PHPUnit_Framework_TestCase $test)
+    {
+        return sprintf('%s:%s', get_class($test), $test->getName());
     }
 
     private function getReportLength()
