@@ -12,12 +12,17 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
     /**
      * @var int
      */
-    private $reportLength;
+    private $slowThreshold;
+
+    /**
+     * @var array
+     */
+    private $groupSlowThresholds;
 
     /**
      * @var int
      */
-    private $slowThreshold;
+    private $reportLength;
 
     /**
      * A collection of tests deemed as slow.
@@ -36,21 +41,29 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
      */
     private $suites = 0;
 
-    public function __construct(array $options)
+    public function __construct($slowThreshold = 500, array $groupSlowThresholds = [], $reportLength = 10)
     {
-        $this->reportLength = isset($options['reportLength']) ? $options['reportLength'] : 10;
-        $this->slowThreshold = isset($options['slowThreshold']) ? $options['slowThreshold'] : 500;
+        $this->slowThreshold = $slowThreshold;
+        $this->groupSlowThresholds = $groupSlowThresholds;
+        $this->reportLength = $reportLength;
     }
 
-    public function endTest(PHPUnit_Framework_Test $test, $timeSeconds)
+    public function endTest(PHPUnit_Framework_Test $test, $time)
     {
         if (!$test instanceof PHPUnit_Framework_TestCase) {
             return;
         }
 
-        $timeMilliseconds = (int) round($timeSeconds * 1000);
-        if ($timeMilliseconds >= $this->getSlowThreshold($test)) {
-            $this->slowTests[$this->makeLabel($test)] = $timeMilliseconds;
+        // Convert time from seconds to milliseconds
+        $time = (int) round($time * 1000);
+        $slowThreshold = $this->getSlowThreshold($test);
+
+        if ($time >= $slowThreshold) {
+            $this->slowTests[] = [
+                'label' => $this->makeLabel($test),
+                'threshold' => $slowThreshold,
+                'time' => $time,
+            ];
         }
     }
 
@@ -78,18 +91,23 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
     private function printHeader($reportLength)
     {
         printf(
-            "\n\n%s %d slow tests (>%sms):\n",
-            count($this->slowTests) > $reportLength ? 'Top' : 'Found',
-            $reportLength,
-            $this->slowThreshold
+            "\n\n%s %d slow tests:\n",
+            count($this->slowTests) > $reportLength ? 'Top' : 'Recorded',
+            $reportLength
         );
     }
 
     private function printReport($reportLength)
     {
         $index = 0;
-        foreach (array_slice($this->slowTests, 0, $reportLength, true) as $label => $time) {
-            printf(" %d. %dms to run %s\n", ++$index, $time, $label);
+        foreach (array_slice($this->slowTests, 0, $reportLength, true) as $slowTest) {
+            printf(
+                " %d. %dms to run %s (expected <%dms)\n",
+                ++$index,
+                $slowTest['time'],
+                $slowTest['label'],
+                $slowTest['threshold']
+            );
         }
     }
 
@@ -113,7 +131,7 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
 
     /**
      * Get the slow threshold for the given test. A test case can override the
-     * suite slow threshold by using the annotation @slowThreshold with the
+     * suite or group slow threshold by using the annotation @slowThreshold with the
      * threshold value in milliseconds.
      */
     private function getSlowThreshold(PHPUnit_Framework_TestCase $test)
@@ -123,6 +141,21 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
             return $annotations['method']['slowThreshold'][0];
         }
 
+        if (isset($annotations['class']['slowThreshold'][0])) {
+            return $annotations['class']['slowThreshold'][0];
+        }
+
+        // Get the lowest slow threshold for the matching groups
+        $matchedSlowThresholds = array_intersect_key(
+            $this->groupSlowThresholds,
+            array_flip($test->getGroups())
+        );
+
+        if (!empty($matchedSlowThresholds)) {
+            return min($matchedSlowThresholds);
+        }
+
+        // No matching thresholds, use the default
         return $this->slowThreshold;
     }
 }
