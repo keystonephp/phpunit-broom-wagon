@@ -6,6 +6,8 @@ A PHPUnit test listener that reports on slow-running tests. Forked from [johnkar
 
 The broom wagon is the name given to the vehicle that follows a cycling road race "sweeping" up stragglers who are unable to make it to the finish of the race within the time permitted. As a cyclist it makes sense to me. That is all that mattered.
 
+![Broom wagon](http://i.imgur.com/9KvpKdo.jpg)
+
 ## Installation
 
 Install via Composer
