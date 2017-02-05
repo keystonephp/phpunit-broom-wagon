@@ -9,6 +9,8 @@ use PHPUnit_Framework_TestSuite;
 
 class TestListener extends PHPUnit_Framework_BaseTestListener
 {
+    const ANNOTATION = 'slowThreshold';
+
     /**
      * @var int
      */
@@ -137,12 +139,12 @@ class TestListener extends PHPUnit_Framework_BaseTestListener
     private function getSlowThreshold(PHPUnit_Framework_TestCase $test)
     {
         $annotations = $test->getAnnotations();
-        if (isset($annotations['method']['slowThreshold'][0])) {
-            return $annotations['method']['slowThreshold'][0];
+        if (isset($annotations['method'][static::ANNOTATION][0])) {
+            return $annotations['method'][static::ANNOTATION][0];
         }
 
-        if (isset($annotations['class']['slowThreshold'][0])) {
-            return $annotations['class']['slowThreshold'][0];
+        if (isset($annotations['class'][static::ANNOTATION][0])) {
+            return $annotations['class'][static::ANNOTATION][0];
         }
 
         // Get the lowest slow threshold for the matching groups
