@@ -31,6 +31,22 @@ Enable the listener by adding it to your `phpunit.xml` configuration file.
 Now run your test suite as normal. If tests take longer than the slow threshold (500ms by default), then
 they will be reported on in the console after the suite completes.
 
+```
+PHPUnit 5.7.5 by Sebastian Bergmann and contributors.
+
+..........                                                        10 / 10 (100%)
+
+Recorded 6 slow tests:
+ 1. 516ms to run ExampleTest:testSomething (expected <500ms)
+ 2. 1004ms to run ExampleTest:testTest with data set "e" (expected <800ms)
+ 3. 1000ms to run ExampleTest:testTest with data set "d" (expected <800ms)
+ 4. 1002ms to run ExampleTest:testTest with data set "c" (expected <800ms)
+ 5. 1004ms to run ExampleTest:testTest with data set "b" (expected <800ms)
+ 6. 1005ms to run ExampleTest:testTest with data set "a" (expected <800ms)
+
+Time: 10.24 seconds, Memory: 4.00MB
+```
+
 ## Configuration
 
 Within the configuration a number of arguments can optionally be passed to the test listener.
